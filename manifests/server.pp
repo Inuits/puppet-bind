@@ -17,9 +17,10 @@
 #  }
 #
 class bind::server (
-    $chroot = true,
+    $chroot        = true,
     # For RHEL5 you might want to use 'bind97'
-    $bindpkgprefix = 'bind'
+    $bindpkgprefix = 'bind',
+    $servicestatus = 'running'
 ) {
 
     # Main package and service it provides
@@ -32,7 +33,7 @@ class bind::server (
         require   => Package[$bindserverpkgname],
         hasstatus => true,
         enable    => true,
-        ensure    => running,
+        ensure    => $servicestatus,
         restart   => '/sbin/service named reload',
     }
 
