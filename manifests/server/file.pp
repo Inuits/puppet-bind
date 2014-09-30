@@ -7,7 +7,7 @@
 #  $zonedir:
 #    Directory where to store the zone file. Default: '/var/named'
 #  $owner:
-#    Zone file user owner. Default: 'root'
+#    Zone file user owner. Default: 'named'
 #  $group:
 #    Zone file group owner. Default: 'named'
 #  $mode:
@@ -28,7 +28,7 @@
 #
 define bind::server::file (
     $zonedir     = '/var/named',
-    $owner       = 'root',
+    $owner       = 'named',
     $group       = 'named',
     $mode        = '0640',
     $source      = undef,
