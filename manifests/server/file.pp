@@ -19,36 +19,61 @@
 #    the zone itselt. Default: none
 #  $content:
 #    Zone file content (usually template-based). Default: none
+#  $ensure:
+#    Whether the zone file should be 'present' or 'absent'. Default: present.
 #
 # Sample Usage :
 #  bind::server::file { 'example.com':
-#      zonedir => '/var/named/chroot/var/named',
-#      source  => 'puppet:///files/dns/example.com',
+#    zonedir => '/var/named',
+#    source  => 'puppet:///files/dns/example.com',
 #  }
 #
 define bind::server::file (
     $zonedir     = '/var/named',
-    $owner       = 'named',
-    $group       = 'named',
+    $owner       = 'root',
+    $group       = undef,
     $mode        = '0640',
+    $dirmode     = '0750',
     $source      = undef,
     $source_base = undef,
-    $content     = undef
+    $content     = undef,
+    $ensure      = undef,
 ) {
 
-    if $source      { $zone_source = $source }
-    if $source_base { $zone_source = "${source_base}${title}" }
+  include '::bind::params'
 
-    file { "${zonedir}/${title}":
-        owner   => $owner,
-        group   => $group,
-        mode    => $mode,
-        source  => $zone_source,
-        content => $content,
-        notify  => Service['named'],
-        # For the parent directory
-        require => Package[$bind::server::bindserverpkgname],
+  if $group {
+    $bindgroup = $group
+  } else {
+    $bindgroup = $::bind::params::bindgroup
+  }
+
+  if $source      { $zone_source = $source }
+  if $source_base { $zone_source = "${source_base}${title}" }
+
+  if ! defined(File[$zonedir]) {
+    file { $zonedir:
+      ensure => directory,
+      owner  => $owner,
+      group  => $bindgroup,
+      mode   => $dirmode,
     }
+  }
+
+  file { "${zonedir}/${title}":
+    ensure  => $ensure,
+    owner   => $owner,
+    group   => $bindgroup,
+    mode    => $mode,
+    source  => $zone_source,
+    content => $content,
+    notify  => Class['::bind::service'],
+    # For the parent directory
+    require => [
+      Class['::bind::package'],
+      File[$zonedir],
+    ],
+  }
 
 }
 

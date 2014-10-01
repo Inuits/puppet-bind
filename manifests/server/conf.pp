@@ -19,6 +19,11 @@
 #   Array of forwarders IP addresses. Default: empty
 #  $directory:
 #   Base directory for the BIND server. Default: '/var/named'
+#  $hostname:
+#   Hostname returned for hostname.bind TXT in CHAOS. Set to 'none' to disable.
+#   Default: undef, bind internal default
+#  $server_id:
+#   ID returned for id.server TXT in CHAOS. Default: undef, empty
 #  $version:
 #   Version string override text. Default: none
 #  $dump_file:
@@ -32,6 +37,14 @@
 #   Array of IP addrs or ACLs to allow queries from. Default: [ 'localhost' ]
 #  $recursion:
 #   Allow recursive queries. Default: 'yes'
+#  $allow_recursion:
+#   Array of IP addrs or ACLs to allow recursion from. Default: empty
+#  $allow_transfer:
+#   Array of IP addrs or ACLs to allow transfer to. Default: empty
+#  $check_names:
+#   Array of check-names strings. Example: [ 'master ignore' ]. Default: empty
+#  $extra_options:
+#   Hash for any additional options that must go in the 'options' declaration. Default: empty
 #  $dnssec_enable:
 #   Enable DNSSEC support. Default: 'yes'
 #  $dnssec_validation:
@@ -46,54 +59,61 @@
 #
 # Sample Usage :
 #  bind::server::conf { '/etc/named.conf':
-#      acls => {
-#          'rfc1918' => [ '10/8', '172.16/12', '192.168/16' ],
-#      },
-#      masters => {
-#          'mymasters' => [ '192.0.2.1', '198.51.100.1' ],
-#      },
-#      zones => {
-#          'example.com' => [
-#              'type master',
-#              'file "example.com"',
-#          ],
-#          'example.org' => [
-#              'type slave',
-#              'file "slaves/example.org"',
-#              'masters { mymasters; }',
-#          ],
-#      }
+#    acls => {
+#      'rfc1918' => [ '10/8', '172.16/12', '192.168/16' ],
+#    },
+#    masters => {
+#      'mymasters' => [ '192.0.2.1', '198.51.100.1' ],
+#    },
+#    zones => {
+#      'example.com' => [
+#        'type master',
+#        'file "example.com"',
+#      ],
+#      'example.org' => [
+#        'type slave',
+#        'file "slaves/example.org"',
+#        'masters { mymasters; }',
+#      ],
+#    }
 #  }
 #
 define bind::server::conf (
-    $acls               = {},
-    $masters            = {},
-    $listen_on_port     = '53',
-    $listen_on_addr     = [ '127.0.0.1' ],
-    $listen_on_v6_port  = '53',
-    $listen_on_v6_addr  = [ '::1' ],
-    $forwarders         = [],
-    $directory          = '/var/named',
-    $version            = false,
-    $dump_file          = '/var/named/data/cache_dump.db',
-    $statistics_file    = '/var/named/data/named_stats.txt',
-    $memstatistics_file = '/var/named/data/named_mem_stats.txt',
-    $allow_query        = [ 'localhost' ],
-    $allow_query_cache  = [],
-    $recursion          = 'yes',
-    $allow_recursion    = [],
-    $dnssec_enable      = 'yes',
-    $dnssec_validation  = 'yes',
-    $dnssec_lookaside   = 'auto',
-    $zones              = {},
-    $includes           = []
+  $acls                   = {},
+  $masters                = {},
+  $listen_on_port         = '53',
+  $listen_on_addr         = [ '127.0.0.1' ],
+  $listen_on_v6_port      = '53',
+  $listen_on_v6_addr      = [ '::1' ],
+  $forwarders             = [],
+  $directory              = '/var/named',
+  $managed_keys_directory = undef,
+  $hostname               = undef,
+  $server_id              = undef,
+  $version                = undef,
+  $dump_file              = '/var/named/data/cache_dump.db',
+  $statistics_file        = '/var/named/data/named_stats.txt',
+  $memstatistics_file     = '/var/named/data/named_mem_stats.txt',
+  $allow_query            = [ 'localhost' ],
+  $allow_query_cache      = [],
+  $recursion              = 'yes',
+  $allow_recursion        = [],
+  $allow_transfer         = [],
+  $check_names            = [],
+  $extra_options          = {},
+  $dnssec_enable          = 'yes',
+  $dnssec_validation      = 'yes',
+  $dnssec_lookaside       = 'auto',
+  $zones                  = {},
+  $includes               = [],
+  $views                  = {},
 ) {
 
-    # Everything is inside a single template
-    file { $title:
-        notify => Service['named'],
-        content => template('bind/named.conf.erb'),
-    }
+  # Everything is inside a single template
+  file { $title:
+    notify  => Class['bind::service'],
+    content => template('bind/named.conf.erb'),
+  }
 
 }
 
