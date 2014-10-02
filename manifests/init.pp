@@ -16,7 +16,7 @@
 #  }
 #
 class bind (
-  $chroot            = true,
+  $chroot            = false,
   $service_reload    = true,
   $packagenameprefix = $::bind::params::packagenameprefix,
 ) inherits ::bind::params {
