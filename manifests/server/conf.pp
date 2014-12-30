@@ -107,6 +107,9 @@ define bind::server::conf (
   $zones                  = {},
   $includes               = [],
   $views                  = {},
+  $keys                   = [],
+  $server                 = [],
+
 ) {
 
   # Everything is inside a single template

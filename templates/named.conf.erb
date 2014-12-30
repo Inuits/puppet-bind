@@ -103,6 +103,18 @@ logging {
         null;
     };
 };
+
+<% if !@keys.empty? -%>
+
+<% @keys.sort_by {|key,value| key}.each do |key,value| -%>
+key "<%= key %>" {
+    algorithm hmac-md5;
+    secret "<%= value %>";
+};
+
+<% end -%>
+<% end -%>
+
 <% if !@views.empty? -%>
 
 <% @views.sort_by {|key,value| key}.each do |key,value| -%>
@@ -116,6 +128,11 @@ view "<%= key %>" {
 <% if value['includes'] and !value['includes'].empty? -%>
 <% value['includes'].each do |filename| -%>
     include "<%= filename %>";
+<% end -%>
+<% end -%>
+<% if !@server.empty? -%>
+<% @server.each do |ip| -%>
+    server <%= ip %> { keys <%= key %>; };
 <% end -%>
 <% end -%>
 <% if value['zones'] and !value['zones'].empty? -%>
@@ -170,4 +187,3 @@ include "/etc/named.rfc1912.zones";
 include "<%= filename %>";
 <% end -%>
 <% end -%>
-
