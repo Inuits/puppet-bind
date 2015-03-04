@@ -7,7 +7,7 @@ class bind::service (
 
   if $service_reload {
     Service[$servicename] {
-      restart => "service ${servicename} restart",
+      restart => "/usr/sbin/named-checkconf && service ${servicename} restart",
     }
   }
 
